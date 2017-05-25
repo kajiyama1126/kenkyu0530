@@ -244,7 +244,7 @@ class Program(object):
                 if (self.stop[i2][i1] / self.stop_base[i2][i1]) < self.stop_condition and self.stopcheck[i2][i1] == 0:
                     self.stopcheck[i2][i1] = 1
                     trigger_sum = 0
-                    if i2 == 0 or i2 == 1:
+                    if i2 == 0 :
                         trigger_sum = k
                     else:
                         for i in range(self.n):

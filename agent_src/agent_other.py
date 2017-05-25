@@ -117,13 +117,27 @@ class Agent_i_harnessing_2(Agent_i_harnessing):
 class Agent_i_harnessing_event(Agent_i_harnessing):
     def __init__(self, n, m, weight, system_A, output_b, number, s,R):
         super(Agent_i_harnessing_event, self).__init__(n, m, weight, system_A, output_b, number, s,R)
-        self.trigger_check = np.ones(n)
+
         self.tildex_ij = np.zeros((self.n, self.m, 1))
         self.tildex_ji = np.zeros((self.n, self.m, 1))
         self.tildes_ij = np.zeros((self.n, self.m, 1))
         self.tildes_ji = np.zeros((self.n, self.m, 1))
+        self.trigger_check = np.ones(n)
+        self.trigger_count = np.zeros(self.n)
+        self.trigger_time = [[] for i in range(n)]
+        self.trigger_time2 = [[]for i in range(n)]
+        self.neighbor_count = np.sum(np.sign(weight)) - 1
         for i in range(self.n):
             self.tildes_ij[i] = self.d_i()
+        self.neighbor = []
+        self.neighbor_check()
+        self.graph_trigger_count = 0
+
+    def neighbor_check(self):
+        for i in range(self.n):
+            if i != self.name:
+                if self.a[i] > 0:
+                    self.neighbor.append(i)
 
     def trigger_judge(self, k):
         for j in range(self.n):
@@ -134,21 +148,21 @@ class Agent_i_harnessing_event(Agent_i_harnessing):
                     self.trigger_check[j] = 0
 
     def send(self, j):
-        # if self.graph_trigger_count == self.neighbor_count:
-        #     self.graph_trigger_count = 1
-        # else:
-        #     self.graph_trigger_count += 1
+        if self.graph_trigger_count == self.neighbor_count:
+            self.graph_trigger_count = 1
+        else:
+            self.graph_trigger_count += 1
 
         if self.trigger_check[j] == 1:
             self.tildex_ij[j] = copy.copy(self.x_i)
             self.tildes_ij[j] = copy.copy(self.s_i)
-            # self.trigger_count[j] += 1
-            # self.trigger_time[j].append(self.graph_trigger_count)
-            # self.trigger_time2[j].append(-10)
+            self.trigger_count[j] += 1
+            self.trigger_time[j].append(self.graph_trigger_count)
+            self.trigger_time2[j].append(-10)
             return (self.x_i,self.s_i)
         else:
-            # self.trigger_time[j].append(-10)
-            # self.trigger_time2[j].append(self.graph_trigger_count)
+            self.trigger_time[j].append(-10)
+            self.trigger_time2[j].append(self.graph_trigger_count)
             return None
 
     def receive(self, j, x_j):
@@ -165,7 +179,7 @@ class Agent_i_harnessing_event(Agent_i_harnessing):
         #         return self.s(k) * self.E
         #     else:
         #         return 2*self.s(k)*self.E
-        return 0.99**k
+        return 10*0.95**k
 
     def koshin(self, k):
         sum = 0.0
