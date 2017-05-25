@@ -11,6 +11,7 @@ import seaborn as sns
 
 from agent_src.agent import Agent_i_constrain
 from agent_src.agent_event import Agent_i_constrain_event_TAC_step_fix
+from agent_src.agent_other import Agent_i_harnessing, Agent_i_harnessing_2,Agent_i_harnessing_event
 from other_src.make_communication import Communication
 from other_src.solver import Solver
 
@@ -64,7 +65,7 @@ class Program(object):
         self.stop_condition = float(config['stop']['condition'])
         self.stepsize = []
         self.threshold = []
-        for i in range(1):
+        for i in range(5):
             self.stepsize.append(float(config['stepsize']['stepsize' + str(int(i + 1))]))
         for i in range(7):
             self.threshold.append(float(config['event']['threshold' + str(int(i + 1))]))
@@ -96,12 +97,15 @@ class Program(object):
             for i2 in range(len(self.test)):
                 for i1 in range(self.test[i2]):
                     if i2 == 0:
-                        agent_i = Agent_i_constrain(self.n, self.m, self.weight_matrix[i], A, b, i, self.stepsize[i1],
+                        agent_i = Agent_i_harnessing(self.n, self.m, self.weight_matrix[i], A, b, i, self.stepsize[i1],
                                                     self.R)
-                    elif i2 == 1:
-                        agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
-                                                                       self.stepsize[0], self.R,
-                                                                       self.threshold[i1], self.th_pa[i1])
+                    if i2 == 1:
+                        agent_i = Agent_i_harnessing_event(self.n, self.m, self.weight_matrix[i], A, b, i, self.stepsize[i1],
+                                                    self.R)
+                    # elif i2 == 1:
+                    #     agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
+                    #                                                    self.stepsize[0], self.R,
+                    #                                                    self.threshold[i1], self.th_pa[i1])
                     elif i2 == 2:
                         agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
                                                                        self.stepsize[i1 % 3], self.R, self.threshold[0],
@@ -240,7 +244,7 @@ class Program(object):
                 if (self.stop[i2][i1] / self.stop_base[i2][i1]) < self.stop_condition and self.stopcheck[i2][i1] == 0:
                     self.stopcheck[i2][i1] = 1
                     trigger_sum = 0
-                    if i2 == 0:
+                    if i2 == 0 or i2 == 1:
                         trigger_sum = k
                     else:
                         for i in range(self.n):
