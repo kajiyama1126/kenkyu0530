@@ -179,7 +179,7 @@ class Agent_i_harnessing_event(Agent_i_harnessing):
         #         return self.s(k) * self.E
         #     else:
         #         return 2*self.s(k)*self.E
-        return 10*0.95**k
+        return 10*0.98**k
 
     def koshin(self, k):
         sum = 0.0
