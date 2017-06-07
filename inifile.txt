@@ -14,7 +14,7 @@ time_graph = 0
 # 1 true or 0 false
 
 [stop]
-condition = 0.0001
+condition = 0.01
 
 [step]
 normal = 0.0

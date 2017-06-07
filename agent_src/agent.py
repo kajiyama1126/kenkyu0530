@@ -35,7 +35,12 @@ class Agent_i(object):
 
     def d_i(self):
         A_T = self.A.transpose()
-        return 2.0 * np.dot(A_T, (np.dot(self.A, self.x_i) - self.b))
+        # return 2.0 * np.dot(A_T, (np.dot(self.A, self.x_i) - self.b))
+        bunbo = np.linalg.norm(np.dot(self.A, self.x_i) - self.b)
+        if bunbo == 0:
+            return np.zeros([self.m,1])
+        else:
+            return np.dot(A_T, (np.dot(self.A, self.x_i) - self.b))/bunbo
 
     def koshin(self, k):
         sum = 0.0

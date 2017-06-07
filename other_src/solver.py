@@ -25,9 +25,10 @@ class Solver(object):
         self.problem()
 
     def problem(self):
-        obj = cvx.Minimize(cvx.norm(self.A *self.x - self.b,2) ** 2)
+        obj = cvx.Minimize(cvx.norm(self.A *self.x - self.b,2)**2)
         constraints = [cvx.norm(self.x, 2) <= self.R]
         self.prob = cvx.Problem(obj,constraints)
+
 
     def solve(self):
         pro = self.prob
@@ -35,3 +36,9 @@ class Solver(object):
         pro.solve(solver = cvx.ECOS_BB,verbose = True)
         print(pro.value)
         return pro.value
+
+class Solver_linear(Solver):
+    def problem(self):
+        obj = cvx.Minimize(cvx.norm(self.A *self.x - self.b,2))
+        constraints = [cvx.norm(self.x, 2) <= self.R]
+        self.prob = cvx.Problem(obj,constraints)

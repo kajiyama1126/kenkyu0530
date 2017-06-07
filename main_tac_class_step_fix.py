@@ -12,7 +12,7 @@ import seaborn as sns
 from agent_src.agent import Agent_i_constrain
 from agent_src.agent_event import Agent_i_constrain_event_TAC_step_fix
 from other_src.make_communication import Communication
-from other_src.solver import Solver
+from other_src.solver import Solver, Solver_linear
 
 
 class Program(object):
@@ -332,3 +332,50 @@ class Program(object):
 
     def presend(self):
         return [[0 for i in range(j)] for j in self.test]
+
+
+class Program_linear(Program):
+    def presimulate(self):
+        self.allagent = [[[] for i in range(j)] for j in self.test]
+        # A = np.identity(self.m) + 0.1 * np.random.rand(self.m, self.m)
+        for i in range(self.n):
+            A = np.identity(self.m) + 0.1 * np.random.randn(self.m, self.m)
+            b = np.array([[-2.], [-1.], [0.], [1.], [2.]]) + 1.0 * np.random.randn(self.m, 1)
+            self.set_A.append(copy.copy(A))
+            self.set_b.append(copy.copy(b))
+
+            for i2 in range(len(self.test)):
+                for i1 in range(self.test[i2]):
+                    if i2 == 0:
+                        agent_i = Agent_i_constrain(self.n, self.m, self.weight_matrix[i], A, b, i, self.stepsize[i1],
+                                                    self.R)
+                    elif i2 == 1:
+                        agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
+                                                                       self.stepsize[0], self.R,
+                                                                       self.threshold[i1], self.th_pa[i1])
+                    elif i2 == 2:
+                        agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
+                                                                       self.stepsize[i1 % 3], self.R, self.threshold[0],
+                                                                       self.th_pa[i1])
+                    elif i2 == 3:
+                        agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
+                                                                       self.stepsize[i1 % 3], self.R, self.threshold[0],
+                                                                       self.th_pa[i1])
+                    self.allagent[i2][i1].append(agent_i)
+                    # for i1 in range(test_event):
+                    #     agent_i = Agent_i_constrain_event(n, m, weight_matrix[i], A, b, i, stepsize[i1 % 3], R, threshold[0],
+                    #                                       th_pa[i1])
+                    #     allagent[1][i1].append(agent_i)
+                    # for i1 in range(test_D_NG):
+                    #     agent_i = Agent_i_constrain_event_moment(n, m, weight_matrix[i], A, b, i, (i1 + 1) * step_D_NG, R,
+                    #                                              threshold[0],
+                    #                                              th_pa[i1])
+                    #     allagent[2][i1].append(agent_i)
+                    # for i1 in range(test_nedic):
+                    #     agent_i = Agent_i_nedic(n, m, weight_matrix[i], A, b, i, (i1 + 1.0) * step_nedic)
+                    #     allagent[3][i1].append(agent_i)
+                    # =================================================================================================================
+
+    def centlized_solve(self):
+        solver = Solver_linear(self.n, self.m, self.R, self.set_A, self.set_b)
+        self.optimal_val = solver.solve()
