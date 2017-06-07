@@ -14,7 +14,7 @@ time_graph = 0
 # 1 true or 0 false
 
 [stop]
-condition = 0.000001
+condition = 0.0001
 
 [step]
 normal = 0.0
@@ -23,8 +23,8 @@ D_NG = 0.1
 nedic = 0.01
 
 [stepsize]
-stepsize1 = 0.005
-stepsize2 = 0.003
+stepsize1 = 0.02
+stepsize2 = 0.01
 stepsize3 = 1.0
 stepsize4 = 0.8
 stepsize5 = 1.0
