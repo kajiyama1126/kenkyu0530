@@ -177,7 +177,7 @@ class Agent_i_constrain_event_TAC_thresh_fix(Agent_i_constrain_event):
 class Agent_i_constrain_event_moment(Agent_i_constrain_event):
     def __init__(self, n, m, weight, system_A, output_b, number, s, R, th,th_pa = 0):
         super(Agent_i_constrain_event_moment, self).__init__(n, m, weight, system_A, output_b, number, s, R, th, th_pa)
-        self.gamma = 0.999
+        self.gamma = 0.9
         self.v_i = np.zeros((self.m,1))
 
 
@@ -200,6 +200,44 @@ class Agent_i_constrain_event_moment(Agent_i_constrain_event):
         self.x_i = z_i
         self.x_i = self.P_X(self.x_i)
         self.trigger_judge(k + 1)
+
+class Agent_i_constrain_event_moment2(Agent_i_constrain_event_moment):
+    def __init__(self, n, m, weight, system_A, output_b, number, s, R, th,th_pa = 0):
+        super(Agent_i_constrain_event_moment2, self).__init__(n, m, weight, system_A, output_b, number, s, R, th, th_pa)
+        self.v_j = np.zeros((self.n,self.m,1))
+
+    def send(self, j):
+        if self.graph_trigger_count == self.neighbor_count:
+            self.graph_trigger_count = 1
+        else:
+            self.graph_trigger_count += 1
+
+        if self.trigger_check[j] == 1:
+            self.tildex_ij[j] = copy.copy(self.x_i)
+            self.trigger_count[j] += 1
+            self.trigger_time[j].append(self.graph_trigger_count)
+            self.trigger_time2[j].append(-10)
+            return (self.x_i, self.v_i)
+        else:
+            self.trigger_time[j].append(-10)
+            self.trigger_time2[j].append(self.graph_trigger_count)
+            return None
+
+    def receive(self, j, x_j):
+        if x_j is None:
+            return
+        else:
+            self.tildex_ji[j] = x_j[0]
+            self.v_j[j] = x_j[1]
+
+    def v_update(self, k):
+        sum = 0
+        for j in range(self.n):
+            if j != self.name:
+                sum += self.a[j] * (self.v_j[j]-self.v_i)
+        v_i = self.v_i + sum
+        # self.v_i = self.hat_s(k)*self.gamma*v_i + self.s(k)*self.d_i()
+        self.v_i = self.s(k) * self.gamma * v_i + self.s(k) * self.d_i()
 
 class Agent_i_constrain_event_moment_psi(Agent_i_constrain_event_moment):
     def __init__(self, n, m, weight, system_A, output_b, number, s, R, th,th_pa = 0):

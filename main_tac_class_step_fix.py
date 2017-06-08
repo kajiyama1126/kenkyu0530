@@ -10,7 +10,8 @@ import pandas as pd
 import seaborn as sns
 
 from agent_src.agent import Agent_i_constrain
-from agent_src.agent_event import Agent_i_constrain_event_TAC_step_fix
+from agent_src.agent_event import Agent_i_constrain_event_TAC_step_fix,Agent_i_constrain_event
+from agent_src.agent_event import Agent_i_constrain_event_moment,Agent_i_constrain_event_moment2
 from other_src.make_communication import Communication
 from other_src.solver import Solver, Solver_linear
 
@@ -99,11 +100,11 @@ class Program(object):
                         agent_i = Agent_i_constrain(self.n, self.m, self.weight_matrix[i], A, b, i, self.stepsize[i1],
                                                     self.R)
                     elif i2 == 1:
-                        agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
+                        agent_i = Agent_i_constrain_event(self.n, self.m, self.weight_matrix[i], A, b, i,
                                                                        self.stepsize[0], self.R,
                                                                        self.threshold[i1], self.th_pa[i1])
                     elif i2 == 2:
-                        agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
+                        agent_i = Agent_i_constrain_event_moment(self.n, self.m, self.weight_matrix[i], A, b, i,
                                                                        self.stepsize[i1 % 3], self.R, self.threshold[0],
                                                                        self.th_pa[i1])
                     elif i2 == 3:
@@ -339,7 +340,7 @@ class Program_linear(Program):
         self.allagent = [[[] for i in range(j)] for j in self.test]
         # A = np.identity(self.m) + 0.1 * np.random.rand(self.m, self.m)
         for i in range(self.n):
-            A = np.identity(self.m) + 0.1 * np.random.randn(self.m, self.m)
+            A = np.identity(self.m) + 0.5* np.random.randn(self.m, self.m)
             b = np.array([[-2.], [-1.], [0.], [1.], [2.]]) + 1.0 * np.random.randn(self.m, 1)
             self.set_A.append(copy.copy(A))
             self.set_b.append(copy.copy(b))
@@ -350,11 +351,11 @@ class Program_linear(Program):
                         agent_i = Agent_i_constrain(self.n, self.m, self.weight_matrix[i], A, b, i, self.stepsize[i1],
                                                     self.R)
                     elif i2 == 1:
-                        agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
+                        agent_i = Agent_i_constrain_event(self.n, self.m, self.weight_matrix[i], A, b, i,
                                                                        self.stepsize[0], self.R,
                                                                        self.threshold[i1], self.th_pa[i1])
                     elif i2 == 2:
-                        agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
+                        agent_i = Agent_i_constrain_event_moment2(self.n, self.m, self.weight_matrix[i], A, b, i,
                                                                        self.stepsize[i1 % 3], self.R, self.threshold[0],
                                                                        self.th_pa[i1])
                     elif i2 == 3:
@@ -379,3 +380,14 @@ class Program_linear(Program):
     def centlized_solve(self):
         solver = Solver_linear(self.n, self.m, self.R, self.set_A, self.set_b)
         self.optimal_val = solver.solve()
+
+
+    def optimal(self, i0, i1, i2):
+        optimal_val = 0
+        x_i = self.allagent[i2][i1][i0].x_i
+        # for i in range(self.n):
+            # optimal_val += np.dot((np.dot(self.set_A[i], x_i) - self.set_b[i]).T,
+                                  # np.dot(self.set_A[i], x_i) - self.set_b[i])
+            # optimal_val += np.linalg.norm(np.dot(self.set_A[i], x_i) - self.set_b[i])
+        optimal_val = np.linalg.norm((np.dot(self.set_A,x_i)-self.set_b))
+        return optimal_val
