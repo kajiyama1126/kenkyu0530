@@ -4,17 +4,17 @@ dimension = 5
 constrain = 3
 
 [simulation]
-iteration = 5000
+iteration = 1000
 normal = 0
-event = 7
-D_NG = 0
+event = 1
+D_NG = 1
 nedic = 0
 
 time_graph = 0
 # 1 true or 0 false
 
 [stop]
-condition = 0.01
+condition = 0.0001
 
 [step]
 normal = 0.0
