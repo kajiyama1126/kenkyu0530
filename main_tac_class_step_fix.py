@@ -151,11 +151,12 @@ class Program(object):
     def optimal(self, i0, i1, i2):
         optimal_val = 0
         x_i = self.allagent[i2][i1][i0].x_i
-        for i in range(self.n):
-            optimal_val += np.dot((np.dot(self.set_A[i], x_i) - self.set_b[i]).T,
-                                  np.dot(self.set_A[i], x_i) - self.set_b[i])
-        return optimal_val[0][0]
-
+        # for i in range(self.n):
+        #     optimal_val += np.dot((np.dot(self.set_A[i], x_i) - self.set_b[i]).T,
+        #                           np.dot(self.set_A[i], x_i) - self.set_b[i])
+        optimal_val = (np.linalg.norm(np.dot(self.set_A,x_i)-self.set_b))**2
+        # return optimal_val[0][0]
+        return optimal_val
     def save(self):
         self.stop = [[0 for i in range(j)] for j in self.test]
         for i2 in range(len(self.test)):
