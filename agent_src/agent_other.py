@@ -72,3 +72,142 @@ class Agent_i_nedic(Agent_i):
                 sum += self.a[j] * (self.y_j[j] - self.y_i)
         z_i = self.y_i + sum + self.d_i() - d
         self.y_i = z_i
+
+
+class Agent_i_harnessing(Agent_i):
+    def __init__(self, n, m, weight, system_A, output_b, number, s, R):
+        super(Agent_i_harnessing, self).__init__(n, m, weight, system_A, output_b, number, s)
+        self.s_i = self.d_i()
+        self.s_j = np.zeros_like(self.x_j)
+
+    def s(self):
+        return self.step
+
+    def send(self, j):
+        return (self.x_i, self.s_i)
+
+    def receive(self, j, x_j):
+        self.x_j[j] = x_j[0]
+        self.s_j[j] = x_j[1]
+
+    def koshin(self, k):
+        sum = 0.0
+        sum1 = 0.0
+        d_bf = self.d_i()
+        for j in range(self.n):
+            if j != self.name:
+                sum += self.a[j] * (self.x_j[j] - self.x_i)
+                sum1 += self.a[j] * (self.s_j[j] - self.s_i)
+        z_i = self.x_i + sum - self.s() * self.s_i
+        self.x_i = z_i
+        self.s_i = self.s_i + sum1 + self.d_i() - d_bf
+
+
+class Agent_i_harnessing_2(Agent_i_harnessing):
+    def koshin(self,k):
+        sum = 0.0
+        d_bf = self.d_i()
+        for j in range(self.n):
+            if j != self.name:
+                sum += self.a[j] * (self.x_j[j] - self.x_i)
+        z_i = self.x_i + sum - self.s() * self.s_i
+        self.x_i = z_i
+        self.s_i = self.s_i + self.d_i() - d_bf
+
+class Agent_i_harnessing_event(Agent_i_harnessing):
+    def __init__(self, n, m, weight, system_A, output_b, number, s,R):
+        super(Agent_i_harnessing_event, self).__init__(n, m, weight, system_A, output_b, number, s,R)
+
+        self.tildex_ij = np.zeros((self.n, self.m, 1))
+        self.tildex_ji = np.zeros((self.n, self.m, 1))
+        self.tildes_ij = np.zeros((self.n, self.m, 1))
+        self.tildes_ji = np.zeros((self.n, self.m, 1))
+        self.trigger_check = np.ones(n)
+        self.trigger_count = np.zeros(self.n)
+        self.trigger_time = [[] for i in range(n)]
+        self.trigger_time2 = [[]for i in range(n)]
+        self.neighbor_count = np.sum(np.sign(weight)) - 1
+        for i in range(self.n):
+            self.tildes_ij[i] = self.d_i()
+        self.neighbor = []
+        self.neighbor_check()
+        self.graph_trigger_count = 0
+
+    def neighbor_check(self):
+        for i in range(self.n):
+            if i != self.name:
+                if self.a[i] > 0:
+                    self.neighbor.append(i)
+
+    def trigger_judge(self, k):
+        for j in range(self.n):
+            if self.a[j] > 0:
+                if np.linalg.norm(self.x_i - self.tildex_ij[j]) >= self.threshold(k,j):
+                    self.trigger_check[j] = 1
+                else:
+                    self.trigger_check[j] = 0
+
+    def send(self, j):
+        if self.graph_trigger_count == self.neighbor_count:
+            self.graph_trigger_count = 1
+        else:
+            self.graph_trigger_count += 1
+
+        if self.trigger_check[j] == 1:
+            self.tildex_ij[j] = copy.copy(self.x_i)
+            self.tildes_ij[j] = copy.copy(self.s_i)
+            self.trigger_count[j] += 1
+            self.trigger_time[j].append(self.graph_trigger_count)
+            self.trigger_time2[j].append(-10)
+            return (self.x_i,self.s_i)
+        else:
+            self.trigger_time[j].append(-10)
+            self.trigger_time2[j].append(self.graph_trigger_count)
+            return None
+
+    def receive(self, j, x_j):
+        if x_j is None:
+            return
+        else:
+            self.tildex_ji[j] = x_j[0]
+            self.tildes_ji[j] = x_j[1]
+
+
+    def threshold(self, k,j):
+        # if self.th_pattern == 0:
+        #     if self.a[j] > 0.15:
+        #         return self.s(k) * self.E
+        #     else:
+        #         return 2*self.s(k)*self.E
+        return 10*0.98**k
+
+    def koshin(self, k):
+        sum = 0.0
+        sum1 = 0.0
+        d_bf = self.d_i()
+        for j in range(self.n):
+            if j != self.name:
+                sum += self.a[j] * (self.tildex_ji[j] - self.tildex_ij[j])
+                sum1 += self.a[j] * (self.tildes_ji[j] - self.tildes_ij[j])
+        z_i = self.x_i + sum - self.s() * self.s_i
+        self.x_i = z_i
+        self.s_i = self.s_i + sum1 + self.d_i() - d_bf
+        self.trigger_judge(k + 1)
+
+        # elif self.th_pattern == 1:
+        #     return 1.0/((k+1))
+        #
+        # elif self.th_pattern == 2 :
+        #     return 10.0/((k+1))
+        #
+        # elif self.th_pattern == 3:
+        #     return 100.0/((k+1))
+        #
+        # elif self.th_pattern == 4:
+        #     return 10.0 / ((k + 1)**2)
+        #
+        # elif self.th_pattern == 5:
+        #     return 10.0 / ((k + 1) ** 0.7)
+        #
+        # elif self.th_pattern == 6:
+        #     return 10.0 / ((k + 1) ** 0.5)

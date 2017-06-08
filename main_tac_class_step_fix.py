@@ -37,7 +37,6 @@ class Program(object): #f_i = ||Ax-b||^2の場合の問題
             config.write(configfile)
             # os.chdir('../')
             # ====================================================初期設定======================================
-
         self.n = int(config['agent']['number'])  # エージェント数
         self.m = int(config['agent']['dimension'])  # 次元
         self.R = float(config['agent']['constrain'])  # 凸制約
