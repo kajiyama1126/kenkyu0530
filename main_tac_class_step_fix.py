@@ -12,6 +12,7 @@ import seaborn as sns
 from agent_src.agent import Agent_i_constrain
 from agent_src.agent_event import Agent_i_constrain_event_TAC_step_fix,Agent_i_constrain_event
 from agent_src.agent_event import Agent_i_constrain_event_moment,Agent_i_constrain_event_moment2
+from agent_src.agent_other import Agent_i_harnessing, Agent_i_harnessing_event
 from other_src.make_communication import Communication
 from other_src.solver import Solver, Solver_linear
 
@@ -52,15 +53,15 @@ class Program(object): #f_i = ||Ax-b||^2の場合の問題
         # nx.draw(Graph.G)
         self.time_graph = int(config['simulation']['time_graph'])
 
-        test_patter = int(config['simulation']['normal'])
-        test_event = int(config['simulation']['event'])
-        test_D_NG = int(config['simulation']['D_NG'])
-        test_nedic = int(config['simulation']['nedic'])
+        test_agent_algo1 = int(config['simulation']['algo1'])
+        test_agent_algo2 = int(config['simulation']['algo2'])
+        test_agent_algo3= int(config['simulation']['algo3'])
+        test_agent_algo4 = int(config['simulation']['algo4'])
 
-        step_normal = float(config['step']['normal'])
-        step_event = float(config['step']['event'])
-        step_D_NG = float(config['step']['D_NG'])
-        step_nedic = float(config['step']['nedic'])
+        # step_normal = float(config['step']['normal'])
+        # step_event = float(config['step']['event'])
+        # step_D_NG = float(config['step']['D_NG'])
+        # step_nedic = float(config['step']['nedic'])
 
         self.stop_condition = float(config['stop']['condition'])
         self.stepsize = []
@@ -72,7 +73,7 @@ class Program(object): #f_i = ||Ax-b||^2の場合の問題
 
         self.th_pa = [0, 1, 2, 3, 4, 5, 6, ]
         # ==================================================================================================
-        self.test = (test_patter, test_event, test_D_NG, test_nedic)
+        self.test = (test_agent_algo1, test_agent_algo2, test_agent_algo3 , test_agent_algo4)
         self.stopcheck = [[0 for i in range(j)] for j in self.test]
 
         self.value_f = [[[[] for i in range(self.n)] for j in range(self.test[k])] for k in range(len(self.test))]
@@ -359,9 +360,8 @@ class Program_linear(Program):#f_i = ||Ax-b||の問題
                                                                        self.stepsize[i1 % 3], self.R, self.threshold[0],
                                                                        self.th_pa[i1])
                     elif i2 == 3:
-                        agent_i = Agent_i_constrain_event_TAC_step_fix(self.n, self.m, self.weight_matrix[i], A, b, i,
-                                                                       self.stepsize[i1 % 3], self.R, self.threshold[0],
-                                                                       self.th_pa[i1])
+                        agent_i = Agent_i_harnessing_event(self.n, self.m, self.weight_matrix[i], A, b, i,
+                                                                       0.02, self.R)
                     self.allagent[i2][i1].append(agent_i)
                     # for i1 in range(test_event):
                     #     agent_i = Agent_i_constrain_event(n, m, weight_matrix[i], A, b, i, stepsize[i1 % 3], R, threshold[0],
