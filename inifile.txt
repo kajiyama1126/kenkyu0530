@@ -1,3 +1,7 @@
+[problem]
+#linear or quadratic
+problem = linear
+
 [agent]
 number = 50
 dimension = 5

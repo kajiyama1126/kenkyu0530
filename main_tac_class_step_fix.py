@@ -16,7 +16,7 @@ from other_src.make_communication import Communication
 from other_src.solver import Solver, Solver_linear
 
 
-class Program(object):
+class Program(object): #f_i = ||Ax-b||^2の場合の問題
     def __init__(self):
         os.chdir('/Users/kajiyama/PycharmProjects/kenkyu0525')
         config = configparser.ConfigParser()
@@ -37,6 +37,7 @@ class Program(object):
             config.write(configfile)
             # os.chdir('../')
             # ====================================================初期設定======================================
+
         self.n = int(config['agent']['number'])  # エージェント数
         self.m = int(config['agent']['dimension'])  # 次元
         self.R = float(config['agent']['constrain'])  # 凸制約
@@ -335,7 +336,7 @@ class Program(object):
         return [[0 for i in range(j)] for j in self.test]
 
 
-class Program_linear(Program):
+class Program_linear(Program):#f_i = ||Ax-b||の問題
     def presimulate(self):
         self.allagent = [[[] for i in range(j)] for j in self.test]
         # A = np.identity(self.m) + 0.1 * np.random.rand(self.m, self.m)
@@ -385,9 +386,9 @@ class Program_linear(Program):
     def optimal(self, i0, i1, i2):
         optimal_val = 0
         x_i = self.allagent[i2][i1][i0].x_i
-        # for i in range(self.n):
+        for i in range(self.n):
             # optimal_val += np.dot((np.dot(self.set_A[i], x_i) - self.set_b[i]).T,
                                   # np.dot(self.set_A[i], x_i) - self.set_b[i])
-            # optimal_val += np.linalg.norm(np.dot(self.set_A[i], x_i) - self.set_b[i])
-        optimal_val = np.linalg.norm((np.dot(self.set_A,x_i)-self.set_b))
+            optimal_val += np.linalg.norm(np.dot(self.set_A[i], x_i) - self.set_b[i])
+        # optimal_val = np.linalg.norm((np.dot(self.set_A,x_i)-self.set_b))
         return optimal_val

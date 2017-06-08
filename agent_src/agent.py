@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import configparser
 
 
-class Agent_i(object):
+class Agent_i(object):#基本エージェント(Nedic09)
     E = float()
 
     # (エージェント数，次元数、重み付き行列，A,b，エージェントの名前)
@@ -22,7 +23,9 @@ class Agent_i(object):
         # カウント用
         # self.x_i = np.zeros((m, 1))
         self.x_i = 10 * np.random.rand(m, 1)
-
+        config = configparser.ConfigParser()
+        config.read('/Users/kajiyama/PycharmProjects/kenkyu0525/inifile.txt')
+        self.problem = str(config['problem']['problem'])
 
     def s(self, k):  # ステップ幅
         return self.step / (k + 1)
@@ -33,14 +36,16 @@ class Agent_i(object):
     def receive(self, j, x_j):
         self.x_j[j] = x_j
 
-    def d_i(self):
+    def d_i(self):#劣勾配
         A_T = self.A.transpose()
-        # return 2.0 * np.dot(A_T, (np.dot(self.A, self.x_i) - self.b))
-        bunbo = np.linalg.norm(np.dot(self.A, self.x_i) - self.b)
-        if bunbo == 0:
-            return np.zeros([self.m,1])
-        else:
-            return np.dot(A_T, (np.dot(self.A, self.x_i) - self.b))/bunbo
+        if self.problem == 'linear':
+            bunbo = np.linalg.norm(np.dot(self.A, self.x_i) - self.b)
+            if bunbo == 0:
+                return np.zeros([self.m,1])
+            else:
+                return np.dot(A_T, (np.dot(self.A, self.x_i) - self.b))/bunbo
+        elif self.problem == 'quadratic':
+            return 2.0 * np.dot(A_T, (np.dot(self.A, self.x_i) - self.b))
 
     def koshin(self, k):
         sum = 0.0
